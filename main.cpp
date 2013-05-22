@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     const QString LanguageOption = "--language=";
     QString filename1;
     QString filename2;
+    QString filename3;
     QString language = QLocale::system().name();
     bool optionsOK = true;
     Debug debug = DebugOff;
@@ -55,11 +56,12 @@ int main(int argc, char *argv[])
         else if (optionsOK && arg.startsWith(LanguageOption))
             language = arg.mid(LanguageOption.length());
         else if (optionsOK && (arg == "--help" || arg == "-h")) {
-            out << "usage: diffpdf [options] [file1.pdf [file2.pdf]]\n\n"
+            out << "usage: diffpdf [options] [file1.pdf [file2.pdf [output.pdf]]]\n\n"
                 "A GUI program that compares two PDF files and shows "
                 "their differences.\n"
                 "\nThe files are optional and are normally set "
-                "through the user interface.\n\n"
+                "through the user interface.\n"
+                "If output.pdf is defined - console/Jenkins mode is enabled (no GUI).\n\n"
                 "options:\n"
                 "--help        -h   show this usage text and terminate "
                 "(run the program without this option and press F1 for "
@@ -97,6 +99,8 @@ int main(int argc, char *argv[])
             filename1 = arg;
         else if (filename2.isEmpty() && arg.toLower().endsWith(".pdf"))
             filename2 = arg;
+        else if (filename3.isEmpty() && arg.toLower().endsWith(".pdf"))
+            filename3 = arg;
         else
             out << "unrecognized argument '" << arg << "'\n";
     }
@@ -109,9 +113,10 @@ int main(int argc, char *argv[])
     appTranslator.load("diffpdf_" + language, ":/");
     app.installTranslator(&appTranslator);
 
-    MainWindow window(debug, comparisonMode, filename1, filename2,
+    MainWindow window(debug, comparisonMode, filename1, filename2, filename3,
             language.left(2)); // We want de not de_DE etc.
-    window.show();
+    if (filename3.isEmpty())
+        window.show();
     return app.exec();
 }
 

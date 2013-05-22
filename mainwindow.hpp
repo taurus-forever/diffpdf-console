@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(const Debug debug,
             const InitialComparisonMode comparisonMode,
-            const QString &filename1, const QString &filename2,
+            const QString &filename1, const QString &filename2, const QString &filename3,
             const QString &language, QWidget *parent=0);
 
 protected:
@@ -62,12 +62,12 @@ private slots:
     void setFile2(QString filename=QString());
     void setFiles1(const QStringList &filenames);
     void setFiles2(const QStringList &filenames);
-    void compare();
+    void compare(); 
     void options();
     void save();
     void about();
     void help();
-    void initialize(const QString &filename1, const QString &filename2);
+    void initialize(const QString &filename1, const QString &filename2, const QString &filename3);
     void updateUi();
     void updateViews(int index=-1);
     void controlDockLocationChanged(Qt::DockWidgetArea area);
@@ -88,7 +88,7 @@ private slots:
 private:
     enum Difference {NoDifference, TextualDifference, VisualDifference};
 
-    void createWidgets(const QString &filename1, const QString &filename2);
+    void createWidgets(const QString &filename1, const QString &filename2, const QString &filename3);
     void createCentralArea();
     void createDockWidgets();
     void createConnections();
@@ -145,6 +145,7 @@ private:
     QScrollArea *area1;
     QPushButton *setFile2Button;
     LineEdit *filename2LineEdit;
+    LineEdit *filename3LineEdit;
     QLabel *comparePages2Label;
     QLineEdit *pages2LineEdit;
     Label *page2Label;

@@ -48,7 +48,7 @@
 
 MainWindow::MainWindow(const Debug debug,
         const InitialComparisonMode comparisonMode,
-        const QString &filename1, const QString &filename2,
+        const QString &filename1, const QString &filename2, const QString &filename3,
         const QString &language, QWidget *parent)
     : QMainWindow(parent),
       controlDockArea(Qt::RightDockWidgetArea),
@@ -73,7 +73,7 @@ MainWindow::MainWindow(const Debug debug,
     QPixmapCache::setCacheLimit(1000 *
             qBound(1, settings.value("CacheSizeMB", 25).toInt(), 100));
 
-    createWidgets(filename1, filename2);
+    createWidgets(filename1, filename2, filename3);
     createCentralArea();
     createDockWidgets();
     createConnections();
@@ -103,12 +103,14 @@ MainWindow::MainWindow(const Debug debug,
     compareComboBox->setCurrentIndex(comparisonMode);
     QMetaObject::invokeMethod(this, "initialize", Qt::QueuedConnection,
             Q_ARG(QString, filename1),
-            Q_ARG(QString, filename2));
+            Q_ARG(QString, filename2),
+            Q_ARG(QString, filename3));
 }
 
 
 void MainWindow::createWidgets(const QString &filename1,
-                               const QString &filename2)
+                               const QString &filename2,
+                               const QString &filename3)
 {
     setFile1Button = new QPushButton(tr("File #&1..."));
     setFile1Button->setToolTip(tr("<p>Choose the first (left hand) file "
@@ -126,6 +128,10 @@ void MainWindow::createWidgets(const QString &filename1,
     filename2LineEdit->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
     filename2LineEdit->setMinimumWidth(100);
     filename2LineEdit->setText(filename2);
+    filename3LineEdit = new LineEdit;
+    filename3LineEdit->setToolTip(tr("Hidden variable storage"));
+    filename3LineEdit->setMinimumWidth(0);
+    filename3LineEdit->setText(filename3);
     comparePages1Label = new QLabel(tr("Pa&ges:"));
     pages1LineEdit = new QLineEdit;
     comparePages1Label->setBuddy(pages1LineEdit);
@@ -616,7 +622,8 @@ void MainWindow::createConnections()
 
 
 void MainWindow::initialize(const QString &filename1,
-                            const QString &filename2)
+                            const QString &filename2,
+                            const QString &filename3)
 {
     if (!filename1.isEmpty()) {
         setFile1(filename1);
@@ -624,6 +631,10 @@ void MainWindow::initialize(const QString &filename1,
         if (!filename2.isEmpty()) {
             setFile2(filename2);
             compare();
+	    if (!filename3.isEmpty()) {
+		save();
+		exit(0);
+	    }
         }
     }
     else
@@ -1580,8 +1591,19 @@ void MainWindow::options()
 
 void MainWindow::save()
 {
-    SaveForm form(currentPath, &saveFilename, &saveAll, &savePages, this);
-    if (form.exec()) {
+   bool b_temp = false;
+
+   if (!(filename3LineEdit->text()).isEmpty()) {
+	saveFilename = filename3LineEdit->text();
+	saveAll = 1;
+	savePages = SaveBothPages;
+        b_temp = true;
+   } else {
+	SaveForm form(currentPath, &saveFilename, &saveAll, &savePages, this);
+	b_temp = form.exec();
+   };
+
+   if (b_temp) {
         QString filename1 = filename1LineEdit->text();
         PdfDocument pdf1 = getPdf(filename1);
         if (!pdf1)
